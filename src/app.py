@@ -10,13 +10,17 @@ from pymongo import MongoClient
 from src.env import Env, EnvStage
 
 DB_NAME_TO_URI = {
-    "ab_testing": "mongodb+srv://{db_user}:{db_password}@abtesting.8azxalb.mongodb.net/?retryWrites=true&w=majority"
+    "ab_testing": "mongodb+srv://{db_user}:{db_password}@abtesting"
+    ".8azxalb.mongodb.net/?retryWrites=true&w=majority"
 }
 
 
 class DbClient:
     """
-    A wrapper for the pymongo client
+    A wrapper for the pymongo client and enviromental concerns. There are two ways to
+    initialize the client, either by providing the DB URI directly, and including
+    the needed credentials, or by providing a valid username and password for a
+    user with access to the database.
 
     Args:
         env_stage (EnvStage): The stage of the environment
