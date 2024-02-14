@@ -26,9 +26,12 @@ class Env:
 
     def __init__(self, env_stage: EnvStage):
         self.env_stage = env_stage
-        env_path = Path(__file__).parent / f".env.{env_stage.value}"
-        self.env_path = env_path
-        load_dotenv(dotenv_path=self.env_path)
+        base_env_path = Path(__file__).parent / ".env"
+
+        if env_stage != EnvStage.PROD:
+            env_specific = Path(__file__).parent / f".env.{env_stage.value}"
+            load_dotenv(dotenv_path=env_specific, override=True)
+        load_dotenv(base_env_path)
 
     def __getitem__(self, key: str) -> str:
         return os.environ.get(key)

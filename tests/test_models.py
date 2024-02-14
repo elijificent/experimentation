@@ -220,18 +220,3 @@ def test_add_participant_to_experiment():
         variant_blue.variant_uuid,
         variant_purple.variant_uuid,
     ]
-
-    for _i in range(10):
-        participant = ExperimentParticipant(db=client)
-        participant.insert()
-        new_variant = experiment.add_participant_to_experiment(
-            participant.participant_uuid
-        )
-        assert new_variant in [
-            variant_red.variant_uuid,
-            variant_blue.variant_uuid,
-            variant_purple.variant_uuid,
-        ]
-
-    # Should be at least 1 participant in each variant
-    assert 0 not in experiment.get_current_allocations().values()

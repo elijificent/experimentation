@@ -3,28 +3,46 @@ import random
 import uuid
 from enum import Enum
 from typing import Optional
+from urllib.parse import quote
 
 from pymongo import MongoClient
 
 from src.env import Env, EnvStage
 
+DB_NAME_TO_URI = {
+    "ab_testing": "mongodb+srv://{db_user}:{db_password}@abtesting.8azxalb.mongodb.net/?retryWrites=true&w=majority"
+}
+
 
 class DbClient:
     """
     A wrapper for the pymongo client
+
+    Args:
+        env_stage (EnvStage): The stage of the environment
+        db_name (str): The name of the database, defaults to "ab_testing"
+            which contains experimentation models
     """
 
-    def __init__(self, env_stage: EnvStage = EnvStage.DEV):
+    def __init__(self, env_stage: EnvStage = EnvStage.DEV, db_name: str = "ab_testing"):
         self.env = Env(env_stage)
-        self.client = MongoClient(
-            self.env["MONGO_DB_URI"], uuidRepresentation="standard"
-        )
+        env_db_uri = self.env["MONGO_DB_URI"]
+        if env_db_uri is not None:
+            self.client = MongoClient(env_db_uri, uuidRepresentation="standard")
+            return
+
+        db_uri = DB_NAME_TO_URI[db_name].format(
+            db_user=quote(self.env["MONGO_USER"]),
+            db_password=quote(self.env["MONGO_PASSWORD"]),
+        )  # pylint: disable=W1401
+        self.client = MongoClient(db_uri, uuidRepresentation="standard")
 
     def get_collection(self, db_name: str, collection_name: str):
         """
         Get a collection from the mongo database
         """
-        db = self.client[db_name]
+        db_with_env = f"{db_name}-{self.env.env_stage.value}"
+        db = self.client[db_with_env]
         return db[collection_name]
 
 
