@@ -10,7 +10,6 @@ pathspec==0.12.1
 platformdirs==4.2.0
 pluggy==1.4.0
 pymongo==4.6.1
-pymongo_inmemory==0.4.0
 pytest==8.0.0
 python-dotenv==1.0.1
 sentinels==1.0.0

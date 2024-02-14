@@ -18,9 +18,3 @@ lint:
 .PHONY: test
 test:
 	python -m pytest
-
-# If you delete a file from the requirements folder, removing it and running
-# this command will remove it from the environment.
-.PHONY: reset-requirements
-reset-requirements:
-	pip install -r requirements.txt --ignore-installed
