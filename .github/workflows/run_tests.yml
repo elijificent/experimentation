@@ -19,5 +19,5 @@ jobs:
       - name: Run tests
         run: make lint && make test
         env:
-          MONGO_USER: ${{ vars.MONGO_USER }}
-          MONGO_PASSWORD: ${{ vars.MONGO_PASSWORD }}
+          MONGO_USER: ${{ secrets.MONGO_USER }}
+          MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
