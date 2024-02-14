@@ -26,11 +26,12 @@ class Env:
 
     def __init__(self, env_stage: EnvStage):
         self.env_stage = env_stage
-        base_env_path = Path(__file__).parent / ".env"
+        root_path = Path(__file__).parent.parent
+        base_env_path = root_path / ".env"
 
         if env_stage != EnvStage.PROD:
-            env_specific = Path(__file__).parent / f".env.{env_stage.value}"
-            load_dotenv(dotenv_path=env_specific, override=True)
+            env_specific = root_path / f".env.{env_stage.value}"
+            load_dotenv(env_specific)
         load_dotenv(base_env_path)
 
     def __getitem__(self, key: str) -> str:
