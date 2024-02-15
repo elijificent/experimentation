@@ -504,7 +504,7 @@ class User:
         upsert_result = collection.update_one(
             {"user_uuid": user_uuid}, {"$set": kwargs}
         )
-        return upsert_result.modified_count > 1
+        return upsert_result.modified_count > 0
 
     @staticmethod
     def delete(user_uuid: uuid.UUID, db: DbClient) -> bool:
