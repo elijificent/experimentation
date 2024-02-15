@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Optional
 from urllib.parse import quote
 
+import bcrypt
 from pymongo import MongoClient
 
 from src.env import Env, EnvStage
@@ -411,3 +412,118 @@ class ExperimentParticipant:
         )
         participant = collection.find_one({"participant_uuid": participant_uuid})
         return ExperimentParticipant(participant["participant_uuid"], db=db)
+
+
+# User models
+
+
+class User:
+    """
+    A user that has an account in the system
+    """
+
+    DB_NAME = "application"
+    COLLECTION_NAME = "users"
+
+    def __init__(
+        self,
+        username: str,
+        hashed_password: str,
+        random_salt: str,
+        user_uuid: Optional[uuid.UUID] = None,
+        db: Optional[DbClient] = None,
+    ):
+        self.username = username
+        self.hashed_password = hashed_password
+        self.random_salt = random_salt
+
+        if user_uuid is None:
+            self.user_uuid = uuid.uuid4()
+        else:
+            self.user_uuid = user_uuid
+
+        if db is not None:
+            self.db = db
+        else:
+            self.db = DbClient()
+
+    @staticmethod
+    def create(username: str, password: str, db: DbClient) -> uuid.UUID:
+        """
+        Create a new user, and save it to the database
+        Returns the new user's user_uuid
+        """
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
+        collection = db.get_collection(User.DB_NAME, User.COLLECTION_NAME)
+        new_user_uuid = uuid.uuid4()
+
+        current_user = collection.find_one({"user_uuid": new_user_uuid})
+
+        if current_user is not None:
+            raise Exception(
+                "User already exists with that UUID"
+            )  # pylint: disable=W0719
+
+        collection.insert_one(
+            {
+                "username": username,
+                "hashed_password": hashed_password,
+                "random_salt": salt,
+                "user_uuid": new_user_uuid,
+            }
+        )
+
+        return new_user_uuid
+
+    @staticmethod
+    def read(user_uuid: uuid.UUID, db: DbClient) -> Optional["User"]:
+        """
+        Load a user from the database
+        """
+        collection = db.get_collection(User.DB_NAME, User.COLLECTION_NAME)
+        user = collection.find_one({"user_uuid": user_uuid})
+
+        if user is not None:
+            return User(
+                user["username"],
+                user["hashed_password"],
+                user["random_salt"],
+                user["user_uuid"],
+                db,
+            )
+
+        return None
+
+    @staticmethod
+    def update(user_uuid: uuid.UUID, db: DbClient, **kwargs) -> bool:
+        """
+        Update a user in the database. Returns True if the user was updated, False otherwise
+        """
+        collection = db.get_collection(User.DB_NAME, User.COLLECTION_NAME)
+        upsert_result = collection.update_one(
+            {"user_uuid": user_uuid}, {"$set": kwargs}
+        )
+        return upsert_result.modified_count > 1
+
+    @staticmethod
+    def delete(user_uuid: uuid.UUID, db: DbClient) -> bool:
+        """
+        Delete a user from the database. Returns True if the user was deleted, False otherwise
+        """
+        collection = db.get_collection(User.DB_NAME, User.COLLECTION_NAME)
+        delete_result = collection.delete_one({"user_uuid": user_uuid})
+        return delete_result.deleted_count == 1
+
+    @staticmethod
+    def authenticate(user_uuid: str, password: str, db: DbClient) -> bool:
+        """
+        Given a user_uuid and a password, check if the password is correct.
+        """
+        collection = db.get_collection(User.DB_NAME, User.COLLECTION_NAME)
+        user = collection.find_one({"user_uuid": user_uuid})
+        if user is None:
+            return False
+
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), user["random_salt"])
+        return hashed_password == user["hashed_password"]
