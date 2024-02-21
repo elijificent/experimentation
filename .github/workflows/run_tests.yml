@@ -21,3 +21,4 @@ jobs:
         env:
           MONGO_USER: ${{ secrets.MONGO_USER }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+          ENV_STAGE: testing

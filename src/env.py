@@ -36,3 +36,11 @@ class Env:
 
     def __getitem__(self, key: str) -> str:
         return os.environ.get(key)
+
+    @staticmethod
+    def load_current_env() -> "Env":
+        """
+        Load the current environment, given the ENV_STAGE environment variable
+        """
+        stage = os.environ.get("ENV_STAGE", EnvStage.DEV.value)
+        return Env(EnvStage(stage))
