@@ -480,6 +480,7 @@ class ParticipantService:
             participant_uuid=participant_uuid, user_uuid=user_uuid
         )
 
+
 class Helpful:
     """
     Helpful methods overall

@@ -25,6 +25,7 @@ class FunnelStep(Enum):
     SIGNING_UP = "signing_up"
     SIGNED_UP = "signed_up"
 
+
 class RvBVariant:
     """
     A wrapper passed to jinja for displaying a modified button
@@ -41,16 +42,16 @@ class RvBVariant:
             return "red"
         if "blue" in self.variant_name:
             return "blue"
-        
+
         return "default"
-    
+
     def get_text(self) -> str:
         """
         Get the text of the button
         """
         if "with_text" in self.variant_name:
             return "Start your journey!"
-        
+
         return "Register"
 
 
@@ -68,18 +69,22 @@ def index():
     override = request.args.get("r_v_b_override")
     if override is not None:
         print(f"Overriding variant to {override}")
-        return render_template("index.html", logged_in=is_logged_in(), variant=RvBVariant(override))
-        
+        return render_template(
+            "index.html", logged_in=is_logged_in(), variant=RvBVariant(override)
+        )
+
     # Attempt to place the participant in an the button color+text experiment
     rb_experiment_uuid = uuid.UUID(db.env["BUTTON_EXPERIMENT_UUID"])
     participant_uuid = session["session_uuid"]
 
     variant_name = ExperimentInterface.get_variant_name(
-        rb_experiment_uuid,
-        participant_uuid
+        rb_experiment_uuid, participant_uuid
     )
 
-    return render_template("index.html", logged_in=is_logged_in(), variant=RvBVariant(variant_name))
+    return render_template(
+        "index.html", logged_in=is_logged_in(), variant=RvBVariant(variant_name)
+    )
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -95,10 +100,14 @@ def login():
 
         current_user = AuthService.get_user_by_username(username)
         if current_user is None:
-            return render_template("login.html", error_message="Invalid credentials", logged_in=False)
+            return render_template(
+                "login.html", error_message="Invalid credentials", logged_in=False
+            )
 
         if not AuthService.validate_auth(current_user.user_uuid, username, password):
-            return render_template("login.html", error_message="Invalid credentials", logged_in=False)
+            return render_template(
+                "login.html", error_message="Invalid credentials", logged_in=False
+            )
 
         session["user_uuid"] = current_user.user_uuid
         return redirect(url_for("personal_page"))
