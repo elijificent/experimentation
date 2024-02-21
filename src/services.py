@@ -428,6 +428,13 @@ class AuthService:
 
         return UserRepository.update(user_uuid, username=new_username)
 
+    @staticmethod
+    def get_user_by_username(username: str) -> Optional[User]:
+        """
+        Get a user by their username
+        """
+        return UserRepository.get_user_by_username(username)
+
 
 class ParticipantService:
     """
@@ -472,3 +479,54 @@ class ParticipantService:
         return ParticipantToUserRepository.create(
             participant_uuid=participant_uuid, user_uuid=user_uuid
         )
+
+class Helpful:
+    """
+    Helpful methods overall
+    """
+
+    @staticmethod
+    def build_button_experiment(num_participants: int) -> dict:
+        """
+        This will create a new experiment with 5 variants
+        and num_participants participants. The participants
+        will be evenly distributed across the variants.
+
+        Returns a dictionary containing the experiment, the
+        participant_uuids, and the variants.
+        """
+        participant_uuids = [uuid.uuid4() for _i in range(num_participants)]
+        for p_uuid in participant_uuids:
+            ParticipantService.create_participant(p_uuid)
+
+        variant_names = [
+            "red_no_text",
+            "red_with_text",
+            "blue_no_text",
+            "blue_with_text",
+            "control",
+        ]
+        variants: list[ExperimentVariant] = []
+        for i, v_name in enumerate(variant_names):
+            new_variant = ExperimentVariantRepository.create(
+                name=v_name,
+                description="variations on how to display the button",
+                participants=[
+                    participant_uuids[p_index]
+                    for p_index in range(num_participants)
+                    if p_index % 5 == i
+                ],
+            )
+            variants.append(new_variant)
+
+        experiment = ExperimentRepository.create(
+            name="Button Color + Text Experiment",
+            description="Increase engagement by changing the color and text of the button",
+            experiment_variants=[v.variant_uuid for v in variants],
+        )
+
+        return {
+            "experiment": experiment,
+            "participant_uuids": participant_uuids,
+            "variants": variants,
+        }

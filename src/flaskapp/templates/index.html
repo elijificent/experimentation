@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h2>Welcome to A/B Testing! Please register</h2>
+<form method="post" action="{{ url_for('register') }}">
+  <button class="red_vs_blue-btn red_vs_blue--{{ variant.get_color() }}" name="red_vs_blue" value="{{ red_vs_blue }}">
+    {{ variant.get_text() }}
+  </button>
+</form>
+{% endblock %}
