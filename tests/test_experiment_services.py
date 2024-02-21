@@ -74,6 +74,30 @@ def test_variant_in_experiment():
     )
 
 
+def test_experiment_in_progress():
+    assert not ExperimentService.experiment_in_progress(test_experiment.experiment_uuid)
+    with pytest.raises(Exception) as e_info:
+        ExperimentService.experiment_in_progress(uuid.uuid4())
+    assert "Experiment not found" in str(e_info.value)
+
+    misc_experiment: Experiment = ExperimentRepository.create(
+        experiment_status=ExperimentStatus.COMPLETED
+    )
+    assert ExperimentService.experiment_in_progress(misc_experiment.experiment_uuid)
+
+    ExperimentRepository.update(
+        misc_experiment.experiment_uuid,
+        experiment_status=ExperimentStatus.PAUSED,
+    )
+    assert ExperimentService.experiment_in_progress(misc_experiment.experiment_uuid)
+
+    ExperimentRepository.update(
+        misc_experiment.experiment_uuid,
+        experiment_status=ExperimentStatus.STOPPED,
+    )
+    assert not ExperimentService.experiment_in_progress(misc_experiment.experiment_uuid)
+
+
 def test_add_variant_to_experiment():
     assert not ExperimentService.add_variant_to_experiment(
         test_experiment.experiment_uuid, mcu_variant.variant_uuid

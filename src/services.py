@@ -119,7 +119,7 @@ class ExperimentService:
             selected_variant.uuid, participant_uuid
         )
 
-        return True
+        return selected_variant.uuid
 
     @staticmethod
     def get_experiment(experiment_uuid: uuid.UUID) -> Optional[Experiment]:
@@ -147,6 +147,21 @@ class ExperimentService:
             if in_variant:
                 return variant_uuid
         return None
+
+    @staticmethod
+    def experiment_in_progress(experiment_uuid: uuid.UUID) -> bool:
+        """
+        Check if the experiment is in progress/has ended in a valid state.
+        """
+        experiment: Experiment = ExperimentRepository.read(experiment_uuid)
+        if experiment is None:
+            raise Exception("Experiment not found")
+
+        return experiment.experiment_status in [
+            ExperimentStatus.RUNNING,
+            ExperimentStatus.PAUSED,
+            ExperimentStatus.COMPLETED,
+        ]
 
     @staticmethod
     def start_experiment(experiment_uuid: uuid.UUID) -> ExperimentStatus:
