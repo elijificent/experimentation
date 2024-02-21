@@ -11,7 +11,7 @@ import uuid
 from enum import Enum
 from typing import Optional
 
-from src.database.database import DbClient
+from src.database.client import DbClient
 from src.database.models import (
     BaseCollectionModel,
     Experiment,

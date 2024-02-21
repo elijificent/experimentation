@@ -4,7 +4,7 @@ so that it does not need to be passed around to every
 function that needs it
 """
 
-from src.database.database import DbClient
+from src.database.client import DbClient
 from src.env import Env
 
 env = Env.load_current_env()

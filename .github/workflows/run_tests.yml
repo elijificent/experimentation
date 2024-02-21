@@ -21,4 +21,6 @@ jobs:
         env:
           MONGO_USER: ${{ secrets.MONGO_USER }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+          # Doesn't need to be secret secret, but why not
+          MONGO_DEPLOYMENT_SUBDOMAIN: ${{ secrets.MONGO_DEPLOYMENT_SUBDOMAIN }}
           ENV_STAGE: testing
