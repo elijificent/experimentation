@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}A/B Testing++{% endblock %}</title>
+
+    <style>
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .red_vs_blue-btn {
+        padding: 10px;
+        margin: 1rem auto;
+        border-radius: 5px;
+        font-size: 20px;
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: white;
+      }
+
+      .red_vs_blue--blue {
+        background-color: lightblue;
+      }
+
+      .red_vs_blue--red {
+        background-color: pink;
+      }
+
+      .red_vs_blue-btn:hover {
+       transform: scale(1.2);
+      }
+
+      h1, h2 {
+        text-align: center;
+      }
+
+      body {
+        margin: 0 auto;
+        width: 80vw;
+        max-width: 800px;
+      }
+      nav > ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        justify-content: space-around;
+        text-decoration: none;
+      }
+      .nav-button {
+        text-decoration: none;
+        width: 100px;
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .nav-button:hover {
+        background-color: lightblue;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>A/B Testing Framework</h1>
+        <nav>
+            <ul>
+                <li><a class="nav-button" href="{{ url_for('index') }}">Home</a></li>
+                <li><a class="nav-button" href="{{ url_for('login') }}">Login</a></li>
+                <li><a class="nav-button" href="{{ url_for('register') }}">Register</a></li>
+                {% if logged_in %}
+                <li><a class="nav-button" href="{{ url_for('personal_page') }}">My Page</a></li>
+                {% endif %}
+                <li><a class="nav-button" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <hr />
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>
