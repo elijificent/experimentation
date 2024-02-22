@@ -2,7 +2,18 @@
 
 I attended a talk in college once where the lecturer stated
 that most computer scientists tend to do more engineering than science,
-as many of our processes are not data driven nor follow the scientific method. Tabs vs spaces, 
+as many of our processes are not data driven nor follow the scientific method. It was a great lecture, and I was reminded of it when I began
+doing A/B tests professionally. They are a scientific way to 
+test new features, and provide helpful features that make engineering
+those features easier, such as:
+
+- Allows for gradual percent rollout of new features, significantly limiting the impact of buggy and bad features.
+- Programmatic access to the experiment allows for the feature/experiment
+  to be rolled back independent of the application, nearly instantly
+- Programmatic access to the experiment also allows for it to so lay
+  dormant in the application until kicked off
+- Easy, quantified results of a new feature's impact
+
 
 
 ## Quickstart
@@ -51,8 +62,3 @@ The test application contains a simple `User` model, please don't put important 
 ## Testing
 1. `export ENV_STAGE=testing`
 2. `make test`
-
-### Nice features:
-- Enable/disable experiments `ExperimentService`
-- Enable/disable experiments with environment variables
-- Variable number of variants
