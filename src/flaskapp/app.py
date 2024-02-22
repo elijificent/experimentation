@@ -1,4 +1,4 @@
-# pylint: disable=broad-exception-raised
+# pylint: disable=broad-exception-raised,broad-exception-caught
 """
 A test flask application that uses the ab_testing framework
 """
@@ -47,13 +47,21 @@ class RvBVariant:
         return "Register"
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     """
     Home page
     """
     if not session_variables_set():
         create_session()
+
+    if request.method == "POST":
+        # This should match the name associated with participant, but
+        # can be overridden by the query string
+
+        button_value = request.form.get("red_vs_blue", "")
+        print(f"Variant funnel advanced: {button_value}")
+        return redirect(url_for("register"))
 
     if is_logged_in() or db.env["BUTTON_EXPERIMENT_UUID"] is None:
         return render_template("index.html", logged_in=True, variant=RvBVariant())
@@ -102,6 +110,7 @@ def login():
             )
 
         session["user_uuid"] = current_user.user_uuid
+        session["session_step"] = FunnelStep.SIGNED_UP.value
 
         FunnelEventService.create_funnel_event(
             session["session_uuid"], FunnelStep.SIGNED_UP.value, datetime.now()
@@ -137,6 +146,30 @@ def register():
         if not session_variables_set():
             raise Exception("Session variables not set")
 
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm", "")
+
+        if password != confirm:
+            return render_template(
+                "register.html", error_message="Passwords do not match"
+            )
+
+        if AuthService.get_user_by_username(username) is not None:
+            return render_template(
+                "register.html", error_message="Username already taken"
+            )
+
+        try:
+            user = AuthService.create_user(username, password)
+        except Exception as e:
+            if "Password" in str(e):
+                message = "Invalid password. Rules: ..."
+            else:
+                message = "Invalid username. Rules: ..."
+
+            return render_template("register.html", error_message=message)
+        session["user_uuid"] = user.user_uuid
         session["session_step"] = FunnelStep.SIGNED_UP.value
         FunnelEventService.create_funnel_event(
             session["session_uuid"], FunnelStep.SIGNED_UP.value, datetime.now()

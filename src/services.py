@@ -8,9 +8,9 @@ which only makes sense in the context of an  A/B testing
 application, not in the context of generic database models.
 """
 
-from datetime import datetime
 import random
 import uuid
+from datetime import datetime
 from typing import Optional, Union
 
 import bcrypt
@@ -22,6 +22,7 @@ from src.database.models import (
     ExperimentStatus,
     ExperimentVariant,
     FunnelEvent,
+    FunnelStep,
     ParticipantToUser,
     User,
 )
@@ -33,7 +34,6 @@ from src.database.repository import (
     ParticipantToUserRepository,
     UserRepository,
 )
-from src.database.models import FunnelStep
 
 
 class ExperimentService:

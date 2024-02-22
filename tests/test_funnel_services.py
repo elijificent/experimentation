@@ -14,7 +14,9 @@ def test_create_funnel_event():
     event_step = FunnelStep.SIGNING_UP
     event_time = datetime.now() - timedelta(days=1)
 
-    new_event: FunnelEvent = FunnelEventService.create_funnel_event(session_uuid, event_step, event_time)
+    new_event: FunnelEvent = FunnelEventService.create_funnel_event(
+        session_uuid, event_step, event_time
+    )
     assert new_event is not None
     assert new_event.session_uuid == session_uuid
     assert new_event.event_step == event_step
@@ -23,9 +25,7 @@ def test_create_funnel_event():
 
 
 def test_attempt_to_link_participant():
-    assert not FunnelEventService.attempt_to_link_participant(
-        uuid.uuid4(), None
-    )
+    assert not FunnelEventService.attempt_to_link_participant(uuid.uuid4(), None)
     assert not FunnelEventService.attempt_to_link_participant(
         uuid.uuid4(), uuid.uuid4()
     )

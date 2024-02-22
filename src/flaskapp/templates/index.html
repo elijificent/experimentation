@@ -4,8 +4,8 @@
 
 {% block content %}
 <h2>Welcome to A/B Testing! Please register</h2>
-<form method="post" action="{{ url_for('register') }}">
-  <button class="red_vs_blue-btn red_vs_blue--{{ variant.get_color() }}" name="red_vs_blue" value="{{ red_vs_blue }}">
+<form method="post" action="{{ url_for('index') }}">
+  <button class="red_vs_blue-btn red_vs_blue--{{ variant.get_color() }}" name="red_vs_blue" id="red_vs_blue" value="{{ variant.variant_name }}">
     {{ variant.get_text() }}
   </button>
 </form>

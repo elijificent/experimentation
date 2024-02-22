@@ -18,3 +18,7 @@ lint:
 .PHONY: test
 test:
 	python -m pytest
+
+.PHONY: test-server
+test-server:
+	flask --app src/flaskapp/app --debug run --host=0.0.0.0 --port=5001
