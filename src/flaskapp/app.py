@@ -4,26 +4,18 @@ A test flask application that uses the ab_testing framework
 """
 
 import uuid
+from datetime import datetime
 from enum import Enum
 
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 
+from src.database.models import FunnelStep
 from src.interface import ExperimentInterface
-from src.services import AuthService
+from src.services import AuthService, FunnelEventService
 from src.shared import db
 
 app = Flask(__name__)
 app.secret_key = db.env["FLASK_SECRET_KEY"]
-
-
-class FunnelStep(Enum):
-    """
-    Steps in the user 'funnel', how far along the user is
-    """
-
-    LANDED = "landed"
-    SIGNING_UP = "signing_up"
-    SIGNED_UP = "signed_up"
 
 
 class RvBVariant:
@@ -110,6 +102,13 @@ def login():
             )
 
         session["user_uuid"] = current_user.user_uuid
+
+        FunnelEventService.create_funnel_event(
+            session["session_uuid"], FunnelStep.SIGNED_UP.value, datetime.now()
+        )
+        FunnelEventService.attempt_to_link_participant(
+            session["session_uuid"], current_user.user_uuid
+        )
         return redirect(url_for("personal_page"))
 
     return render_template("login.html", logged_in=False)
@@ -139,12 +138,18 @@ def register():
             raise Exception("Session variables not set")
 
         session["session_step"] = FunnelStep.SIGNED_UP.value
+        FunnelEventService.create_funnel_event(
+            session["session_uuid"], FunnelStep.SIGNED_UP.value, datetime.now()
+        )
         return redirect(url_for("personal_page"))
 
     if not session_variables_set():
         create_session()
 
     session["session_step"] = FunnelStep.SIGNING_UP.value
+    FunnelEventService.create_funnel_event(
+        session["session_uuid"], FunnelStep.SIGNING_UP.value, datetime.now()
+    )
     return render_template("register.html")
 
 
@@ -164,6 +169,10 @@ def create_session():
     if "session_uuid" not in session:
         session["session_uuid"] = uuid.uuid4()
     session["session_step"] = FunnelStep.LANDED.value
+
+    FunnelEventService.create_funnel_event(
+        session["session_uuid"], FunnelStep.LANDED.value, datetime.now()
+    )
 
 
 def session_variables_set() -> bool:

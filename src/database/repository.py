@@ -16,6 +16,7 @@ from src.database.models import (
     Experiment,
     ExperimentParticipant,
     ExperimentVariant,
+    FunnelEvent,
     ParticipantToUser,
     User,
 )
@@ -203,6 +204,16 @@ class ParticipantToUserRepository(BaseRepository):
     @classmethod
     def model_class(cls) -> BaseCollectionModel:
         return ParticipantToUser
+
+
+class FunnelEventRepository(BaseRepository):
+    """
+    Repository for the funnel event collection
+    """
+
+    @classmethod
+    def model_class(cls) -> BaseCollectionModel:
+        return FunnelEvent
 
 
 if __name__ == "__main__":

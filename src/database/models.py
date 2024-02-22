@@ -113,6 +113,16 @@ class ExperimentStatus(Enum):
     COMPLETED = "completed"
 
 
+class FunnelStep(Enum):
+    """
+    Steps in the user 'funnel', how far along the user is
+    """
+
+    LANDED = "landed"
+    SIGNING_UP = "signing_up"
+    SIGNED_UP = "signed_up"
+
+
 class Experiment(BaseCollectionModel):
     """
     The root model for AB testing, represents an hypothesis to be tested
@@ -231,3 +241,30 @@ class ParticipantToUser(BaseCollectionModel):
     ):
         self.participant_uuid = participant_uuid
         self.user_uuid = user_uuid
+
+
+class FunnelEvent(BaseCollectionModel):
+    """
+    A funnel event
+    """
+
+    DB_NAME = "application"
+    COLLECTION_NAME = "funnel_events"
+    UUID_FIELD = "event_uuid"
+
+    def __init__(
+        self,
+        session_uuid: Optional[uuid.UUID] = None,
+        event_step: Union[FunnelStep, str] = FunnelStep.LANDED,
+        event_time: Optional[datetime.datetime] = None,
+        event_uuid: Optional[uuid.UUID] = None,
+    ):
+        self.session_uuid = session_uuid
+        self.session_uuid = session_uuid
+        self.event_time = event_time
+        self.event_uuid = event_uuid
+
+        if isinstance(event_step, str):
+            self.event_step = FunnelStep(event_step.lower())
+        else:
+            self.event_step = event_step

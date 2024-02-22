@@ -8,18 +8,20 @@ which only makes sense in the context of an  A/B testing
 application, not in the context of generic database models.
 """
 
+from datetime import datetime
 import random
 import uuid
-from datetime import datetime
 from typing import Optional, Union
 
 import bcrypt
 
 from src.database.models import (
+    BaseCollectionModel,
     Experiment,
     ExperimentParticipant,
     ExperimentStatus,
     ExperimentVariant,
+    FunnelEvent,
     ParticipantToUser,
     User,
 )
@@ -27,9 +29,11 @@ from src.database.repository import (
     ExperimentParticipantRepository,
     ExperimentRepository,
     ExperimentVariantRepository,
+    FunnelEventRepository,
     ParticipantToUserRepository,
     UserRepository,
 )
+from src.database.models import FunnelStep
 
 
 class ExperimentService:
@@ -462,7 +466,7 @@ class ParticipantService:
     @staticmethod
     def link_participant_to_user(
         participant_uuid: uuid.UUID, user_uuid: uuid.UUID
-    ) -> bool:
+    ) -> Optional[BaseCollectionModel]:
         """
         Link a participant to a user
         """
@@ -531,3 +535,59 @@ class Helpful:
             "participant_uuids": participant_uuids,
             "variants": variants,
         }
+
+    @staticmethod
+    def random_string(length: int) -> str:
+        """
+        Generate a random string of a given length
+        """
+        return "".join(
+            random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(length)
+        )
+
+
+class FunnelEventService:
+    """
+    Service functions for working with funnel events
+    """
+
+    @staticmethod
+    def create_funnel_event(
+        session_uuid: uuid.UUID,
+        event_step: FunnelStep,
+        event_time: datetime,
+        event_uuid: Optional[uuid.UUID] = None,
+    ) -> Optional[FunnelEvent]:
+        """
+        Create a new funnel event
+        """
+        if event_uuid is None:
+            event_uuid = uuid.uuid4()
+
+        new_event = FunnelEventRepository.create(
+            session_uuid=session_uuid,
+            event_step=event_step,
+            event_time=event_time,
+            event_uuid=event_uuid,
+        )
+
+        return new_event
+
+    @staticmethod
+    def attempt_to_link_participant(
+        session_uuid: uuid.UUID,
+        user_uuid: uuid.UUID,
+    ) -> bool:
+        """
+        Attempts to link the provided session uuid to a given user uuid
+        """
+        if session_uuid is None or user_uuid is None:
+            return False
+
+        user = AuthService.get_user(user_uuid)
+        if user is not None:
+            return (
+                ParticipantService.link_participant_to_user(session_uuid, user_uuid)
+                is not None
+            )
+        return False
