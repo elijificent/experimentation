@@ -17,6 +17,7 @@ from src.database.models import (
     Experiment,
     ExperimentParticipant,
     ExperimentVariant,
+    FunnelEvent,
     ParticipantToUser,
     User,
 )
@@ -180,16 +181,11 @@ class ParticipantToUserCrud(GenericCrud):
         return ParticipantToUser
 
 
-if __name__ == "__main__":
-    dev_client = DbClient()
-    new_experiment = Experiment(
-        name="hello world",
-        description="this is a test",
-    )
-    print("Creating new experiment...")
-    new_uuid = ExperimentCrud.create(dev_client, new_experiment)
-    print("Created new experiment with UUID:", new_uuid)
+class FunnelEventCrud(GenericCrud):
+    """
+    CRUD operations for the funnel event collection
+    """
 
-    print("Reading new experiment...")
-    experiment = ExperimentCrud.read(dev_client, new_uuid)
-    print("Read experiment:", experiment.to_dict())
+    @classmethod
+    def model_class(cls) -> BaseCollectionModel:
+        return FunnelEvent
