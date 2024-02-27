@@ -8,7 +8,7 @@ import uuid
 from typing import Optional
 
 from src.database.models import Experiment, ExperimentStatus, ExperimentVariant
-from src.database.repository import ExperimentRepository
+from src.database.repository import ExperimentRepository, ExperimentVariantRepository
 from src.services import ExperimentService, ExperimentVariantService
 
 
@@ -118,5 +118,28 @@ class ExperimentInterface:
 
         for i, variant_uuid in enumerate(experiment.experiment_variants):
             ExperimentVariantService.update_allocation(variant_uuid, allocations[i])
+
+        return True
+    
+    @staticmethod
+    def update_variant_descriptions(
+        experiment_uuid: uuid.UUID, descriptions: list[str]
+    ) -> bool:
+        """
+        Update the variant descriptions with the new values provided.
+        The order of the descriptions should match the order of the variants UUIDS
+        """
+        experiment: Experiment = ExperimentRepository.read(experiment_uuid)
+        if not experiment:
+            return False
+
+        if len(descriptions) != len(experiment.experiment_variants):
+            return False
+
+        if not ExperimentInterface.experiment_in_progress(experiment_uuid):
+            return False
+
+        for i, variant_uuid in enumerate(experiment.experiment_variants):
+            ExperimentVariantRepository.update(variant_uuid, description=descriptions[i])
 
         return True

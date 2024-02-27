@@ -80,7 +80,7 @@ asking, "are you really sure?" -->
         <td>{{ variant.allocation / summary['total_allocation'] * 100}}%</td>
         {% endif %}
         <td>{{ variant.participants|length }}</td>
-        <td>{{ variant.description }}</td>
+        <td><textarea name="variant-description">{{ variant.description }}</textarea></td>
         <!-- The variant page has not been created/probably will not be, but this is an easy way to abbreviate the variant uuid
         while still maintaining the ability to view the entire thing. -->
         <td><a href="#/variant?variant_uuid={{ variant.variant_uuid }}">...{{ (variant.variant_uuid|string)[-6:] }}</a></td>

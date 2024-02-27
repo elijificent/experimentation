@@ -252,6 +252,7 @@ def experiment_route(experiment_uuid):
     if request.method == "POST":
         experiment_button = request.form.get("status-adv", "")
         update_allocations = request.form.getlist("allocation-value")
+        update_descriptions = request.form.getlist("variant-description")
         previous_status = ExperimentService.get_experiment(
             actual_uuid
         ).experiment_status
@@ -275,9 +276,18 @@ def experiment_route(experiment_uuid):
                 actual_uuid, float_allocations
             )
             if not allocated:
-                message += "\nAllocation update failed"
+                message += "\nAllocation update failed."
             else:
-                message += "\nAllocation updated"
+                message += "\nAllocation updated."
+
+        if update_descriptions:
+            updated = ExperimentInterface.update_variant_descriptions(
+                actual_uuid, update_descriptions
+            )
+            if not updated:
+                message += "\nDescription update failed."
+            else:
+                message += "\nDescription updated."
 
         return render_template(
             "experiment.html",
