@@ -97,3 +97,26 @@ class ExperimentInterface:
         Get the experiment
         """
         return ExperimentRepository.read(experiment_uuid)
+
+    @staticmethod
+    def update_variant_allocations(
+        experiment_uuid: uuid.UUID, allocations: list[float]
+    ) -> bool:
+        """
+        Update the variant allocations with the new values provided.
+        The order of the allocations should match the order of the variants UUIDS
+        """
+        experiment: Experiment = ExperimentRepository.read(experiment_uuid)
+        if not experiment:
+            return False
+
+        if len(allocations) != len(experiment.experiment_variants):
+            return False
+
+        if not ExperimentInterface.experiment_in_progress(experiment_uuid):
+            return False
+
+        for i, variant_uuid in enumerate(experiment.experiment_variants):
+            ExperimentVariantService.update_allocation(variant_uuid, allocations[i])
+
+        return True
