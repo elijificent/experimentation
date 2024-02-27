@@ -14,6 +14,7 @@ from datetime import datetime
 from typing import Optional, Union
 
 import bcrypt
+import requests
 
 from src.database.models import (
     BaseCollectionModel,
@@ -544,6 +545,15 @@ class Helpful:
         return "".join(
             random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(length)
         )
+
+    @staticmethod
+    def load_url_x_times(url: str, x: int) -> None:
+        """
+        Load a URL x times, useful for creating new experiment
+        participants
+        """
+        for _i in range(x):
+            requests.get(url)
 
 
 class FunnelEventService:

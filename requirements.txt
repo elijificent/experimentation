@@ -1,10 +1,13 @@
 bcrypt==4.1.2
 black==24.2.0
 blinker==1.7.0
+certifi==2024.2.2
+charset-normalizer==3.3.2
 click==8.1.7
 dnspython==2.5.0
 exceptiongroup==1.2.0
 Flask==3.0.2
+idna==3.6
 importlib-metadata==7.0.1
 iniconfig==2.0.0
 isort==5.13.2
@@ -19,8 +22,10 @@ pluggy==1.4.0
 pymongo==4.6.1
 pytest==8.0.0
 python-dotenv==1.0.1
+requests==2.31.0
 sentinels==1.0.0
 tomli==2.0.1
 typing_extensions==4.9.0
+urllib3==2.2.1
 Werkzeug==3.0.1
 zipp==3.17.0

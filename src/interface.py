@@ -5,8 +5,9 @@ to interact with the framework
 """
 
 import uuid
+from typing import Optional
 
-from src.database.models import Experiment, ExperimentStatus
+from src.database.models import Experiment, ExperimentStatus, ExperimentVariant
 from src.database.repository import ExperimentRepository
 from src.services import ExperimentService, ExperimentVariantService
 
@@ -56,3 +57,43 @@ class ExperimentInterface:
             experiment_uuid, participant_uuid
         )
         return ExperimentVariantService.get_variant(new_variant_uuid).name
+
+    @staticmethod
+    def get_experiment_summary(experiment_uuid: uuid.UUID) -> dict:
+        """
+        Get the summary of the experiment
+        """
+        experiment: Experiment = ExperimentRepository.read(experiment_uuid)
+
+        if not experiment:
+            return {}
+
+        variants: list[ExperimentVariant] = [
+            ExperimentVariantService.get_variant(variant_uuid)
+            for variant_uuid in experiment.experiment_variants
+        ]
+        variant_to_participants = {
+            variant.variant_uuid: len(variant.participants) for variant in variants
+        }
+        total_allocation = sum(variant.allocation for variant in variants)
+
+        return {
+            "experiment": ExperimentRepository.read(experiment_uuid),
+            "variants": variants,
+            "variant_to_participants": variant_to_participants,
+            "total_allocation": total_allocation,
+        }
+
+    @staticmethod
+    def get_all_experiments() -> list[Experiment]:
+        """
+        Get all the experiments
+        """
+        return ExperimentRepository.get_all()
+
+    @staticmethod
+    def get_experiment(experiment_uuid: uuid.UUID) -> Optional[Experiment]:
+        """
+        Get the experiment
+        """
+        return ExperimentRepository.read(experiment_uuid)

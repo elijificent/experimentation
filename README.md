@@ -14,7 +14,9 @@ those features easier, such as:
   dormant in the application until kicked off
 - Easy, quantified results of a new feature's impact
 
-
+This implements experimentation through sessions, both so that participants are
+put into experiments in a mostly "masked" trial, as they are not associated with a long lived cookie
+or a application data model like User (although that is an option, and some experiments will only make sense to be run for logged in users), and to avoid cookie privacy and hacking concerns.
 
 ## Quickstart
 Setup environment variables of interest:
@@ -42,7 +44,7 @@ participant UUIDs. You can then set the environment variable `BUTTON_EXPERIMENT_
 
 The concept of a participant is the same as the session_uuid generated,
 meaning that you will need to eaither logout or open a new browser to see
-a new variant. Optionally, you can also override the variant you see using `?r_v_b_override=<variant_name>`. We will have to explore removing these test/admin users from the experiment entirely, but having large enough participants that the experiment to reach significance would
+a new variant. Optionally, you can also override the variant you see using `?r_v_b_override=<variant_name>`. We can explore removing these test/admin users from the experiment entirely, but having large enough participants that the experiment to reach significance would
 likely mean these users become insignificant.
 
 
@@ -54,6 +56,17 @@ The variants are:
 - blue_with_text
 - control (default)
 
+This experiment has 4 variations and a control, so it may take some time to
+reach statistical significance, compared to one with less. It also has
+a lot of covariance between models, which I am sure a real statistician
+could use to decrease that time, but that is out of scope at the moment.
+
+Screenshots of what each look like:
+- [red_no_text](./screenshots/button_alt_red_no_text.png)
+- [red_with_text](./screenshots/button_alt_red_with_text.png)
+- [blue_no_text](./screenshots/button_alt_blue_no_text.png)
+- [blue_with_text](./screenshots/button_alt_blue_with_text.png)
+- [control (default)](./screenshots/button_alt_control.png)
 
 ## Test Application
 
