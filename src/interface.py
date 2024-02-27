@@ -120,7 +120,7 @@ class ExperimentInterface:
             ExperimentVariantService.update_allocation(variant_uuid, allocations[i])
 
         return True
-    
+
     @staticmethod
     def update_variant_descriptions(
         experiment_uuid: uuid.UUID, descriptions: list[str]
@@ -140,6 +140,8 @@ class ExperimentInterface:
             return False
 
         for i, variant_uuid in enumerate(experiment.experiment_variants):
-            ExperimentVariantRepository.update(variant_uuid, description=descriptions[i])
+            ExperimentVariantRepository.update(
+                variant_uuid, description=descriptions[i]
+            )
 
         return True
