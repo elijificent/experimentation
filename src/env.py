@@ -31,7 +31,7 @@ class Env:
 
         if env_stage != EnvStage.PROD:
             env_specific = root_path / f".env.{env_stage.value}"
-            load_dotenv(env_specific)
+            load_dotenv(env_specific, override=True, verbose=True)
         load_dotenv(base_env_path)
 
     def __getitem__(self, key: str) -> str:

@@ -67,6 +67,15 @@
       .error {
         color: red;
       }
+      .experiment-summary {
+        width: 100%;
+        border: 1px solid black;
+      }
+
+      .experiment-summary th, .experiment-summary td {
+        border: 1px solid black;
+        padding: 10px;
+      }
     </style>
 </head>
 <body>
@@ -79,6 +88,7 @@
                 <li><a class="nav-button" href="{{ url_for('register') }}">Register</a></li>
                 {% if logged_in %}
                 <li><a class="nav-button" href="{{ url_for('personal_page') }}">My Page</a></li>
+                <li><a class="nav-button" href="{{ url_for('experiments_route') }}">Experiments</a></li>
                 {% endif %}
                 <li><a class="nav-button" href="{{ url_for('logout') }}">Logout</a></li>
             </ul>

@@ -9,7 +9,7 @@ from enum import Enum
 
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 
-from src.database.models import FunnelStep
+from src.database.models import Experiment, FunnelStep, User
 from src.interface import ExperimentInterface
 from src.services import AuthService, FunnelEventService
 from src.shared import db
@@ -64,7 +64,9 @@ def index():
         return redirect(url_for("register"))
 
     if is_logged_in() or db.env["BUTTON_EXPERIMENT_UUID"] is None:
-        return render_template("index.html", logged_in=True, variant=RvBVariant())
+        return render_template(
+            "index.html", logged_in=is_logged_in(), variant=RvBVariant()
+        )
 
     override = request.args.get("r_v_b_override")
     if override is not None:
@@ -73,10 +75,16 @@ def index():
             "index.html", logged_in=is_logged_in(), variant=RvBVariant(override)
         )
 
-    # Attempt to place the participant in an the button color+text experiment
     rb_experiment_uuid = uuid.UUID(db.env["BUTTON_EXPERIMENT_UUID"])
-    participant_uuid = session["session_uuid"]
+    rb_experiment: Experiment = ExperimentInterface.get_experiment(rb_experiment_uuid)
 
+    if not rb_experiment:
+        return render_template(
+            "index.html", logged_in=is_logged_in(), variant=RvBVariant()
+        )
+
+    # Attempt to place the participant in an the button color+text experiment
+    participant_uuid = session["session_uuid"]
     variant_name = ExperimentInterface.get_variant_name(
         rb_experiment_uuid, participant_uuid
     )
@@ -95,6 +103,9 @@ def login():
         return redirect(url_for("personal_page"))
 
     if request.method == "POST":
+        if not session_variables_set():
+            create_session()
+
         username = request.form.get("username", "")
         password = request.form.get("password", "")
 
@@ -131,7 +142,8 @@ def personal_page():
     if not is_logged_in():
         return redirect(url_for("login"))
 
-    return render_template("personal_page.html", loggeded_in=True)
+    user: User = AuthService.get_user(session["user_uuid"])
+    return render_template("personal_page.html", logged_in=True, user=user)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -144,11 +156,11 @@ def register():
 
     if request.method == "POST":
         if not session_variables_set():
-            raise Exception("Session variables not set")
+            create_session()
 
         username = request.form.get("username", "")
         password = request.form.get("password", "")
-        confirm = request.form.get("confirm", "")
+        confirm = request.form.get("confirm_password", "")
 
         if password != confirm:
             return render_template(
@@ -169,6 +181,7 @@ def register():
                 message = "Invalid username. Rules: ..."
 
             return render_template("register.html", error_message=message)
+
         session["user_uuid"] = user.user_uuid
         session["session_step"] = FunnelStep.SIGNED_UP.value
         FunnelEventService.create_funnel_event(
@@ -220,3 +233,42 @@ def is_logged_in() -> bool:
     Check if the user is logged in
     """
     return "user_uuid" in session
+
+
+@app.route("/experiment/<experiment_uuid>", methods=["GET", "POST"])
+def experiment_route(experiment_uuid):
+    """
+    List all experiments. This would be only visible to
+    admins in a real application
+    """
+    if not is_logged_in():
+        return redirect(url_for("login"))
+
+    if not experiment_uuid:
+        return render_template("experiments.html", logged_in=True)
+
+    experiment_summary = ExperimentInterface.get_experiment_summary(
+        uuid.UUID(experiment_uuid)
+    )
+
+    if not experiment_summary:
+        return redirect(url_for("experiments_route"))
+
+    return render_template(
+        "experiment.html", summary=experiment_summary, logged_in=True
+    )
+
+
+@app.route("/experiments", methods=["GET", "POST"])
+def experiments_route():
+    """
+    List all experiments. This would be only visible to
+    admins in a real application
+    """
+    if not is_logged_in():
+        return redirect(url_for("login"))
+
+    all_experiments = ExperimentInterface.get_all_experiments()
+    return render_template(
+        "experiments.html", logged_in=True, experiments=all_experiments
+    )

@@ -132,6 +132,17 @@ class ExperimentRepository(BaseRepository):
 
         return False
 
+    @classmethod
+    def get_all(cls):
+        """
+        Return all experiments
+        """
+        all_experiments = db.get_collection(cls.model_class()).find({})
+        return [
+            cls.model_crud().read(db, experiment[cls.model_class().UUID_FIELD])
+            for experiment in all_experiments
+        ]
+
 
 class ExperimentVariantRepository(BaseRepository):
     """
