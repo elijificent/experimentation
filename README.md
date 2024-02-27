@@ -68,6 +68,9 @@ Screenshots of what each look like:
 - [blue_with_text](./screenshots/button_alt_blue_with_text.png)
 - [control (default)](./screenshots/button_alt_control.png)
 
+[Experiment summary](./screenshots/experiment_summary.png)
+
+
 ## Test Application
 
 The test application contains a simple `User` model, please don't put important passwords in it.

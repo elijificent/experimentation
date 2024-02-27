@@ -11,7 +11,7 @@ from flask import Flask, jsonify, redirect, render_template, request, session, u
 
 from src.database.models import Experiment, FunnelStep, User
 from src.interface import ExperimentInterface
-from src.services import AuthService, FunnelEventService
+from src.services import AuthService, ExperimentService, FunnelEventService
 from src.shared import db
 
 app = Flask(__name__)
@@ -247,6 +247,54 @@ def experiment_route(experiment_uuid):
     if not experiment_uuid:
         return render_template("experiments.html", logged_in=True)
 
+    actual_uuid = uuid.UUID(experiment_uuid)
+
+    if request.method == "POST":
+        experiment_button = request.form.get("status-adv", "")
+        update_allocations = request.form.getlist("allocation-value")
+        update_descriptions = request.form.getlist("variant-description")
+        previous_status = ExperimentService.get_experiment(
+            actual_uuid
+        ).experiment_status
+
+        if experiment_button == "Play":
+            new_status = ExperimentService.start_experiment(actual_uuid)
+        elif experiment_button == "Pause":
+            new_status = ExperimentService.pause_experiment(actual_uuid)
+        elif experiment_button == "Stop":
+            new_status = ExperimentService.stop_experiment(actual_uuid)
+        elif experiment_button == "Complete":
+            new_status = ExperimentService.complete_experiment(actual_uuid)
+        else:
+            new_status = previous_status
+
+        message = f"Experiment: {previous_status.value} -> {new_status.value}."
+
+        if update_allocations:
+            float_allocations = [float(alloc) for alloc in update_allocations]
+            allocated = ExperimentInterface.update_variant_allocations(
+                actual_uuid, float_allocations
+            )
+            if not allocated:
+                message += "\nAllocation update failed."
+            else:
+                message += "\nAllocation updated."
+
+        if update_descriptions:
+            updated = ExperimentInterface.update_variant_descriptions(
+                actual_uuid, update_descriptions
+            )
+            if not updated:
+                message += "\nDescription update failed."
+            else:
+                message += "\nDescription updated."
+
+        return render_template(
+            "experiment.html",
+            summary=ExperimentInterface.get_experiment_summary(actual_uuid),
+            logged_in=True,
+            message=message,
+        )
     experiment_summary = ExperimentInterface.get_experiment_summary(
         uuid.UUID(experiment_uuid)
     )

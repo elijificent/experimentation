@@ -69,7 +69,7 @@ class BaseRepository:
             if arg not in model_fields or arg == cls.model_class().UUID_FIELD:
                 raise Exception(f"Invalid field: {arg}")
 
-            if isinstance(arg_value, Enum):
+            if isinstance(arg_value, Enum) and arg_value is not None:
                 current_instance.__dict__[arg] = arg_value.value
             else:
                 current_instance.__dict__[arg] = arg_value
